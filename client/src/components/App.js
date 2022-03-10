@@ -5,16 +5,29 @@
 //   Link
 // } from "react-router-dom";
 import {useEffect, useState} from 'react'
-import Auth from './Auth'
-import Login from './Login'
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link
+} from "react-router-dom";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import Auth from './Authorization/Auth'
+import Login from './Authorization/Login'
 import UserPage from './UserPage'
-import Timers from './Timers'
-
+import Timers from './Timers/Timers'
+import TasksPage from './TaskPage/TasksPage'
+import ActiveList from './TaskPage/ActiveList'
+import CompletedList from './TaskPage/CompletedList'
+import Navigation from './Navigation'
 function App() {
   
   const [errors, setErrors] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [tasks, setTasks] = useState(null);
+  const [activeTasks, setActiveTasks] = useState([])
+  const [completedTasks, setCompletedTasks] = useState([])
 
   useEffect(() => {
     fetch("/auth")
@@ -24,24 +37,71 @@ function App() {
         .then((user) => {
           setIsAuthenticated(true);
           setCurrentUser(user);
+          
         });
       }
     });
 
   
 
-  },[]);
+  },[currentUser]);
 
  
-  // if (!isAuthenticated) return <Login error={'please login'} setIsAuthenticated={setIsAuthenticated} setCurrentUser={setCurrentUser} />;
+   if (!isAuthenticated) return <>
+   <Login error={'please login'}  setTasks={setTasks} 
+   tasks={tasks} 
+   setIsAuthenticated={setIsAuthenticated} 
+   isAuthenticated={isAuthenticated}  
+   currentUser={currentUser} 
+   setCurrentUser={setCurrentUser} />
+   <Auth setIsAuthenticated={setIsAuthenticated} 
+   setCurrentUser={setCurrentUser} />
+   </> 
 
   return (
     <>
-    <h1>Focus</h1>
-   <Login error={'please login'} setIsAuthenticated={setIsAuthenticated} isAuthenticated={isAuthenticated} setCurrentUser={setCurrentUser}/>
-   <Auth setIsAuthenticated={setIsAuthenticated} setCurrentUser={setCurrentUser} currentUser={currentUser}/>
-  <UserPage currentUser={currentUser} />
+    <Router>
+      <Navigation />
+    
+    
+    <Routes>
+<Route path='/user' 
+element={<UserPage currentUser={currentUser} />} 
+/>
+ <Route path='/Home' element={<>
+  <ActiveList 
+  tasks={tasks}
+  setTasks={setTasks}
+  activeTasks={activeTasks}
+  setActiveTasks={setActiveTasks}
+  completedTasks={completedTasks}
+  setCompletedTasks={setCompletedTasks}/>
   <Timers sampleCountdownMs={1500000}/>
+  <TasksPage 
+  completedTasks={completedTasks}
+  setCompletedTasks={setCompletedTasks}
+  setTasks={setTasks} 
+  tasks={tasks} 
+  currentUser={currentUser} 
+  activeTasks={activeTasks}
+  setActiveTasks={setActiveTasks}
+  
+  />
+
+ </>}
+ />
+ <Route path='/completed' element={<>
+  <CompletedList 
+   tasks={tasks} 
+   currentUser={currentUser} 
+   setActiveTasks={setActiveTasks} 
+   activeTasks={activeTasks} 
+   completedTasks={completedTasks}
+  setCompletedTasks={setCompletedTasks}/>
+ </>}/>
+   
+   </Routes>
+   </Router>
     </>
   );
 }

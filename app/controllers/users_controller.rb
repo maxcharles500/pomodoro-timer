@@ -15,6 +15,7 @@ class UsersController < ApplicationController
     rescue ActiveRecord::RecordInvalid => invalid 
         render json: { errors: invalid.record.errors }, status: :unprocessable_entity 
     end 
+   
 
     private 
 
